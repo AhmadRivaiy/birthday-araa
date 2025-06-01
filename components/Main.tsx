@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSpring, animated } from '@react-spring/web';
-import dynamic from "next/dynamic";
 import Balloon from './Ballon';
+import dynamic from "next/dynamic";
 const DrawingCanvas = dynamic(() => import('@/components/DrawingCanvas'), { ssr: false });
 
 type Blade = {
