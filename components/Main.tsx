@@ -39,6 +39,7 @@ export default function PageMain() {
 
         if (sign) {
             audioRef.current?.play();
+            setIsPlaying(true);
             setSignatureData(sign);
         }
     };
@@ -51,9 +52,30 @@ export default function PageMain() {
         const audio = audioRef.current;
         if (audio) {
             audio.volume = 0.4;
-            audio.play().catch((e) => console.log('Autoplay blocked:', e));
         }
     }, []);
+
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    useEffect(() => {
+        const handleFirstInteraction = () => {
+            const audio = audioRef.current;
+            if (audio && !isPlaying) {
+                audio.volume = 0.4;
+                audio.play().then(() => {
+                    setIsPlaying(true);
+                }).catch((err) => {
+                    console.warn('Audio play failed:', err);
+                });
+            }
+        };
+
+        window.addEventListener('touchstart', handleFirstInteraction, { once: true });
+
+        return () => {
+            window.removeEventListener('touchstart', handleFirstInteraction);
+        };
+    }, [isPlaying]);
 
     return (
         <div className="w-full">
