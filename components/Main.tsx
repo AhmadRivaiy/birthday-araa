@@ -51,12 +51,7 @@ export default function PageMain() {
         const audio = audioRef.current;
         if (audio) {
             audio.volume = 0.4;
-            const playAudio = () => {
-                audio.play().catch((e) => console.log('Autoplay blocked:', e));
-                window.removeEventListener('click', playAudio);
-            };
-
-            window.addEventListener('click', playAudio);
+            audio.play().catch((e) => console.log('Autoplay blocked:', e));
         }
     }, []);
 
