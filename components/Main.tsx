@@ -1,9 +1,12 @@
 // Contoh halaman utama (pages/index.tsx)
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Head from 'next/head';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { useSpring, animated } from '@react-spring/web';
-import dynamic from "next/dynamic";
+import dynamic from "next/dynamic"; import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Text3D, Center } from '@react-three/drei';
+
+
 import Balloon from './Ballon';
 const DrawingCanvas = dynamic(() => import('@/components/DrawingCanvas'), { ssr: false });
 
@@ -35,7 +38,7 @@ export default function PageMain() {
     };
 
     useEffect(() => {
-        setPageID(0);
+        setPageID(2);
     }, []);
 
     return (
@@ -94,7 +97,23 @@ export default function PageMain() {
 
                 {pageID === 2 && (
                     <motion.div
-                        key="page-1"
+                        key="page-2"
+                        initial={{ opacity: 0, y: 0 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="absolute top-0 left-0 w-full"
+                    >
+                        <div className="fixed inset-0 bg-[#FFF2EB] flex items-center justify-center ">
+                            <ScreenThree onPageChange={(s) => handlePageChange(s, null)} />
+                            <SpringGrass />
+                        </div>
+                    </motion.div>
+                )}
+
+                {pageID === 3 && (
+                    <motion.div
+                        key="page-3"
                         initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 0 }}
@@ -108,9 +127,9 @@ export default function PageMain() {
                     </motion.div>
                 )}
 
-                {pageID === 3 && (
+                {pageID === 4 && (
                     <motion.div
-                        key="page-1"
+                        key="page-4"
                         initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 0 }}
@@ -152,7 +171,7 @@ function ScreenTwo({ onPageChange }: { onPageChange: (data: number) => void }) {
         if (document && clickedIndex < 21) {
             setClickedIndex(clickedIndex + 1);
             const modal = document.getElementById('my_modal_2') as HTMLDialogElement | null;
-            if (modal && ((clickedIndex + 1) === 21)) {
+            if (modal && ((clickedIndex + 1) === 3)) {
                 modal.showModal();
             }
         }
@@ -185,6 +204,67 @@ function ScreenTwo({ onPageChange }: { onPageChange: (data: number) => void }) {
     );
 }
 
+function ScreenThree({ onPageChange }: { onPageChange: (data: number) => void }) {
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    // Efek rotasi 3D dari gerakan drag
+    const rotateX = useTransform(y, [-100, 100], [15, -15]);
+    const rotateY = useTransform(x, [-100, 100], [-15, 15]);
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-pink-100 overflow-hidden">
+            <motion.div
+                drag
+                style={{
+                    x,
+                    y,
+                    rotateX,
+                    rotateY,
+                    perspective: 1000,
+                }}
+                dragElastic={0.2}
+                dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
+                className="cursor-grab text-center p-4"
+            >
+                <h1 className="text-3xl md:text-5xl font-bold text-pink-800">
+                    kalau ulang tahun, pasti ada kueh apa?
+                </h1>
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1, duration: 0.5 }}
+                    className="mt-4 text-2xl md:text-4xl text-pink-600"
+                >
+                    <Canvas camera={{ position: [0, 0, 30], fov: 40 }}>
+                        <ambientLight intensity={0.7} />
+                        <directionalLight position={[10, 10, 5]} intensity={1} />
+                        <Suspense fallback={null}>
+                            <Center>
+                                <Text3D
+                                    font="/fonts/helvetiker_regular.typeface.json"
+                                    size={3}
+                                    height={1}
+                                    curveSegments={12}
+                                    bevelEnabled
+                                    bevelThickness={0.1}
+                                    bevelSize={0.05}
+                                    bevelOffset={0}
+                                    bevelSegments={5}
+                                >
+                                    Kue Ulang Tahun
+                                    <meshStandardMaterial color="#ff6699" />
+                                </Text3D>
+                            </Center>
+                        </Suspense>
+                        <OrbitControls enablePan={false} />
+                    </Canvas>
+                </motion.div>
+            </motion.div>
+        </div>
+    );
+}
+
 function BirthdayCakeSVG({ onPageChange }: { onPageChange: (data: number) => void }) {
     const texts = [
         "tiup lilinnya yaa raa",
@@ -200,7 +280,7 @@ function BirthdayCakeSVG({ onPageChange }: { onPageChange: (data: number) => voi
     useEffect(() => {
         const interval = setInterval(() => {
             setIndex((prev) => (prev + 1) % texts.length);
-        }, 5000); // ganti tiap 5 detik
+        }, 5000);
 
         return () => clearInterval(interval);
     }, []);
