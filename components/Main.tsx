@@ -1,7 +1,7 @@
 // Contoh halaman utama (pages/index.tsx)
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import Head from 'next/head';
-import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
+import { AnimatePresence, motion, useAnimation, useMotionValue, useTransform } from 'framer-motion';
 import { useSpring, animated } from '@react-spring/web';
 import dynamic from "next/dynamic"; import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Text3D, Center } from '@react-three/drei';
@@ -42,7 +42,7 @@ export default function PageMain() {
     };
 
     useEffect(() => {
-        setPageID(3);
+        setPageID(0);
     }, []);
 
     return (
@@ -75,7 +75,7 @@ export default function PageMain() {
                             initial={{ opacity: 0, y: 0 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 0 }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: 1.5 }}
                             className="absolute top-0 left-0 w-full"
                         >
                             <SplashScreen onSignatureData={(s) => handlePageChange(1, s)} />
@@ -89,7 +89,7 @@ export default function PageMain() {
                         initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 0 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 1.5 }}
                         className="absolute top-0 left-0 w-full"
                     >
                         <div className="fixed inset-0 bg-[#FF9A9A] flex items-center justify-center ">
@@ -104,7 +104,7 @@ export default function PageMain() {
                         initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 0 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 1.5 }}
                         className="absolute top-0 left-0 w-full"
                     >
                         <div className="fixed inset-0 bg-[#FFF2EB] flex items-center justify-center ">
@@ -119,7 +119,7 @@ export default function PageMain() {
                         initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 0 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 1.5 }}
                         className="absolute top-0 left-0 w-full"
                     >
                         <div className="fixed inset-0 bg-[#FFF2EB] flex items-center justify-center ">
@@ -134,7 +134,7 @@ export default function PageMain() {
                         initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 0 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 1.5 }}
                         className="absolute top-0 left-0 w-full"
                     >
                         <div className="fixed inset-0 bg-[#FF9A9A] flex items-center justify-center ">
@@ -167,19 +167,21 @@ function SplashScreen({ onSignatureData }: { onSignatureData: (data: string | nu
 function ScreenTwo({ onPageChange }: { onPageChange: (data: number) => void }) {
     const [clickedIndex, setClickedIndex] = useState<number>(0);
     const [countDown, setCountDown] = useState<number>(5);
+    const [isDisabled, setIsDisabled] = useState<boolean>(false);
 
     const handleClick = () => {
         if (document && clickedIndex < 21) {
             setClickedIndex(clickedIndex + 1);
             const modal = document.getElementById('my_modal_2') as HTMLDialogElement | null;
-            if (modal && ((clickedIndex + 1) === 3)) {
+            if (modal && ((clickedIndex + 1) === 21)) {
+                setIsDisabled(true);
                 modal.showModal();
             }
         }
     }
 
-
     useEffect(() => {
+        setCountDown(5);
         const timer = setInterval(() => {
             setCountDown((prev) => {
                 if (prev <= 1) {
@@ -191,11 +193,11 @@ function ScreenTwo({ onPageChange }: { onPageChange: (data: number) => void }) {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, [isDisabled]);
 
     return (
         <div className="min-h-screen items-center justify-center w-full relative">
-            <Balloon countBallons={21} onClickedBallon={() => handleClick()} />
+            <Balloon countBallons={21} isRandom={true} onClickedBallon={() => handleClick()} />
             <div className='flex flex-col w-full justify-center items-center min-h-screen'>
                 <span className={`mb-8 text-4xl font-semibold ${countDown === 0 ? '' : 'border-2 p-2 rounded-4xl'}`}>{countDown === 0 ? '' : countDown}</span>
                 <span className='mb-8 text-xl font-semibold'>pukul balon nya biar nambah skor</span>
@@ -210,10 +212,15 @@ function ScreenTwo({ onPageChange }: { onPageChange: (data: number) => void }) {
                     <p>bentar - bentar kayak angka sesuatu ngga sih</p>
                     <p>coba tebakk dehhh</p>
                     <div className="modal-action">
-                        <form method="dialog">
-                            {/* if there is a button in form, it will close the modal */}
-                            <button className="btn" onClick={() => onPageChange(2)}>lanjut</button>
-                        </form>
+                        {
+                            countDown === 0 ? (
+                                <form method="dialog">
+                                    <button className="btn btn-accent" onClick={() => onPageChange(2)}>lanjut</button>
+                                </form>
+                            ) : (
+                                <button className="btn">{countDown}</button>
+                            )
+                        }
                     </div>
                 </div>
             </dialog>
@@ -232,10 +239,10 @@ function ScreenThree({ onPageChange }: { onPageChange: (data: number) => void })
     const rotateY = useTransform(x, [-100, 100], [-15, 15]);
 
     useEffect(() => {
-        if (dragCount === 50) {
+        if (dragCount === 30) {
             onPageChange(3);
         }
-        if (dragCount > 30) {
+        if (dragCount > 20) {
             setShowMsg(true);
         }
     }, [dragCount])
@@ -262,10 +269,10 @@ function ScreenThree({ onPageChange }: { onPageChange: (data: number) => void })
                     dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
                     className="cursor-grab text-center p-4"
                 >
-                    <h1 className="text-3xl md:text-5xl font-bold text-pink-800">
+                    <h1 className="text-lg md:text-5xl font-bold text-pink-800">
                         ohh iya,
                     </h1>
-                    <h1 className="text-3xl md:text-5xl font-bold text-pink-800">
+                    <h1 className="text-lg md:text-5xl font-bold text-pink-800">
                         kalau ulang tahun pasti ada kue apa?
                     </h1>
                     <motion.h2
@@ -280,7 +287,7 @@ function ScreenThree({ onPageChange }: { onPageChange: (data: number) => void })
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 4, duration: 0.5 }}
-                        className="text-sm mt-20 text-pink-600"
+                        className="text-sm mt-8 md:mt-10 lg:mt-20 text-pink-600"
                     >
                         <div>
                             <BirthdayTrumpet dragCount={dragCount} />
@@ -293,7 +300,7 @@ function ScreenThree({ onPageChange }: { onPageChange: (data: number) => void })
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: 1, duration: 0.5 }}
-                            className="text-sm mt-20 text-pink-600"
+                            className="text-sm mt-8 md:mt-10 lg:mt-20 text-pink-600"
                         >
                             <div>
                                 bentar lagi kue ulang tahunnya muncul, <br />
@@ -302,52 +309,6 @@ function ScreenThree({ onPageChange }: { onPageChange: (data: number) => void })
                         </motion.h2>
                     )}
                 </motion.div>
-                {/* <Canvas camera={{ position: [0, 0, 80], fov: 40 }}>
-                    <ambientLight intensity={0.7} />
-                    <directionalLight position={[10, 10, 5]} intensity={1} />
-                    <Suspense fallback={null}>
-                        <Center>
-                            <Text3D
-                                font="/fonts/helvetiker_regular.typeface.json"
-                                size={3}
-                                height={1}
-                                curveSegments={12}
-                                bevelEnabled
-                                bevelThickness={0.1}
-                                bevelSize={0.05}
-                                bevelOffset={0}
-                                bevelSegments={5}
-                            >
-                                kalau ulang tahun, pasti ada kueh apa?
-                                <meshStandardMaterial color="#ff6699" />
-                            </Text3D>
-                        </Center>
-                    </Suspense>
-                    <OrbitControls enablePan={false} />
-                </Canvas>
-                <Canvas camera={{ position: [0, 0, 30], fov: 40 }}>
-                    <ambientLight intensity={0.7} />
-                    <directionalLight position={[10, 10, 5]} intensity={1} />
-                    <Suspense fallback={null}>
-                        <Center>
-                            <Text3D
-                                font="/fonts/helvetiker_regular.typeface.json"
-                                size={3}
-                                height={1}
-                                curveSegments={12}
-                                bevelEnabled
-                                bevelThickness={0.1}
-                                bevelSize={0.05}
-                                bevelOffset={0}
-                                bevelSegments={5}
-                            >
-                                Kue Ulang Tahun
-                                <meshStandardMaterial color="#ff6699" />
-                            </Text3D>
-                        </Center>
-                    </Suspense>
-                    <OrbitControls enablePan={false} />
-                </Canvas> */}
             </motion.div>
         </div>
     );
@@ -358,13 +319,13 @@ function BirthdayCakeSVG({ onPageChange }: { onPageChange: (data: number) => voi
         "ini dia kue dan lilinnya raa",
         "ehh iya belum nyala lilinnya",
         "selamat ulang tahun!\nAraaaaaaaaaa",
-        "waktu yang udah kelewat kemarin,",
+        "waktu yang udah kelewat,",
         "bakal terus keganti sama waktu yang baru",
         "lakuin semua yang araa mau",
         "araa bikin happy",
         "araa bikin bahagia",
         "araa bikin semangat",
-        "fokus sama apa yang araa mau",
+        "fokus sama apa yang araa tuju",
         "gausah mikirin umur, karena cuma angka",
         "wish you all the best",
         "ayoo tiupp lilinnya, keburu mati apinya...",
@@ -498,19 +459,79 @@ function IceCreamCone({ x, y, scale = 1, rotate = 0 }: { x: number; y: number; s
 
 
 function BirthdayPage({ onPageChange }: { onPageChange: (data: number) => void }) {
-    const [showMessage, setShowMessage] = useState(false);
+    const [countBallon, setCountBallon] = useState(1);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [bounceControls, setBounceControls] = useState(useAnimation());
+    const hasMountedRef = useRef(false);
 
+    const images = [
+        "/images/IMG_0595.JPEG",
+        "/images/IMG_0227.JPEG",
+        "/images/IMG_0653.JPEG",
+        "/images/IMG_0687.JPEG",
+        "/images/IMG_0565.JPEG",
+        "/images/IMG_0745.JPEG",
+    ];
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % images.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        hasMountedRef.current = true;
+    }, []);
+
+    const handleClick = () => {
+        if (hasMountedRef.current) {
+            bounceControls.start({
+                scale: [1, 1.2, 0.9, 1.1, 1],
+                transition: { duration: 0.6, times: [0, 0.2, 0.4, 0.6, 1] },
+            });
+        }
+        setCountBallon((prev) => {
+            return prev + 1;
+        });
+    };
     return (
-        <div className="min-h-screen w-full bg-[#A3D8FF] flex flex-col items-center justify-center p-4 text-center">
+        <div className="min-h-screen w-full bg-[#A3D8FF] relative flex flex-col items-center justify-center p-4 text-center">
             <Head>
                 <title>Happy Birthday, Cantikk! ❤️</title>
             </Head>
-
-            <img
-                src="/kalian-berdua.jpg"
-                alt="Kalian berdua"
-                className="w-64 h-64 rounded-xl object-cover border-4 border-[#4793AF]"
-            />
+            <Balloon countBallons={countBallon} text='araaaa' />
+            <FullscreenConfetti particleCount={30} />
+            <motion.div
+                className="absolute top-24 -right-2 z-50 w-28"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+            >
+                <TotoroSVG />
+            </motion.div>
+            <div className="absolute -top-18 -left-18 z-50">
+                <SunAnimated />
+            </div>
+            <div className="relative w-64 h-64 rounded-xl overflow-hidden border-4 border-[#4793AF] z-50">
+                <AnimatePresence>
+                    <motion.img
+                        key={images[currentIndex]}
+                        src={images[currentIndex]}
+                        alt="Momen spesial"
+                        className="absolute w-full h-full object-cover"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 0.6 }}
+                    />
+                </AnimatePresence>
+            </div>
+            <motion.div className="absolute bottom-2/12 mt-8 text-xl font-bold text-[#4793AF]"
+                onClick={handleClick}
+                animate={bounceControls}
+            >
+                tiup balon satu lagi <br />
+                🎈
+            </motion.div>
         </div>
     );
 }
@@ -580,5 +601,54 @@ function SpringGrass() {
                 })}
             </animated.svg>
         </div>
+    );
+}
+
+function TotoroSVG() {
+    return (
+        <img src="/images/totoro-sits-on-tree-branch-dnsbt14o1qxjvcvj.svg" alt="Totoro" />
+    );
+}
+
+function SunAnimated() {
+    return (
+        <motion.svg
+            width="180"
+            height="180"
+            viewBox="0 0 180 180"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+        >
+            <circle cx="90" cy="90" r="30" fill="#FFD93D" />
+
+            {[...Array(8)].map((_, i) => {
+                const angle = (i * 360) / 8;
+                const x1 = 90 + 30 * Math.cos((angle * Math.PI) / 180);
+                const y1 = 90 + 30 * Math.sin((angle * Math.PI) / 180);
+                const x2 = 90 + 40 * Math.cos((angle * Math.PI) / 180);
+                const y2 = 90 + 40 * Math.sin((angle * Math.PI) / 180);
+
+                return (
+                    <motion.line
+                        key={i}
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke="#FFD93D"
+                        strokeWidth="4"
+                        initial={{ opacity: 0.5 }}
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{
+                            repeat: Infinity,
+                            duration: 2,
+                            delay: i * 0.2,
+                        }}
+                    />
+                );
+            })}
+        </motion.svg>
     );
 }

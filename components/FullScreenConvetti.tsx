@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-export default function CanvasConfetti() {
+export default function CanvasConfetti({ particleCount  = 130 }: { particleCount?: number }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -13,7 +13,7 @@ export default function CanvasConfetti() {
         const confetti: ConfettiParticle[] = [];
         const colors = ['#FF6B6B', '#6BCB77', '#4D96FF', '#FFD93D', '#FFB347', '#B19CD9'];
 
-        for (let i = 0; i < 150; i++) {
+        for (let i = 0; i < particleCount; i++) {
             confetti.push(createParticle());
         }
 
