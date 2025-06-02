@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Poppins, Geist_Mono } from "next/font/google";
-import PageMain from "@/components/Main";
+import dynamic from "next/dynamic";
+const PageMain = dynamic(() => import('@/components/Main'), { ssr: false });
 
 const poppinsSans = Poppins({
   variable: "--font-poppins-sans",

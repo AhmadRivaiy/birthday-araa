@@ -8,6 +8,10 @@ import { OrbitControls, Text3D, Center } from '@react-three/drei';
 
 
 import Balloon from './Ballon';
+import BirthdayBunting from './BirthRope';
+import BirthdayTrumpet from './BirthdayTrumpet';
+import FullscreenConfetti from './FullScreenConvetti';
+import GiftBox from './GiftBox';
 const DrawingCanvas = dynamic(() => import('@/components/DrawingCanvas'), { ssr: false });
 
 type Blade = {
@@ -38,7 +42,7 @@ export default function PageMain() {
     };
 
     useEffect(() => {
-        setPageID(2);
+        setPageID(3);
     }, []);
 
     return (
@@ -90,7 +94,6 @@ export default function PageMain() {
                     >
                         <div className="fixed inset-0 bg-[#FF9A9A] flex items-center justify-center ">
                             <ScreenTwo onPageChange={(s) => handlePageChange(s, null)} />
-                            <SpringGrass />
                         </div>
                     </motion.div>
                 )}
@@ -106,7 +109,6 @@ export default function PageMain() {
                     >
                         <div className="fixed inset-0 bg-[#FFF2EB] flex items-center justify-center ">
                             <ScreenThree onPageChange={(s) => handlePageChange(s, null)} />
-                            <SpringGrass />
                         </div>
                     </motion.div>
                 )}
@@ -122,7 +124,6 @@ export default function PageMain() {
                     >
                         <div className="fixed inset-0 bg-[#FFF2EB] flex items-center justify-center ">
                             <BirthdayCakeSVG onPageChange={(s) => handlePageChange(s, null)} />
-                            <SpringGrass />
                         </div>
                     </motion.div>
                 )}
@@ -138,11 +139,11 @@ export default function PageMain() {
                     >
                         <div className="fixed inset-0 bg-[#FF9A9A] flex items-center justify-center ">
                             <BirthdayPage onPageChange={(s) => handlePageChange(s, null)} />
-                            <SpringGrass />
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
+            <SpringGrass />
         </div>
     )
 }
@@ -159,13 +160,13 @@ function SplashScreen({ onSignatureData }: { onSignatureData: (data: string | nu
                     </span>
                 </div>
             </div>
-            <SpringGrass />
         </div>
     );
 }
 
 function ScreenTwo({ onPageChange }: { onPageChange: (data: number) => void }) {
     const [clickedIndex, setClickedIndex] = useState<number>(0);
+    const [countDown, setCountDown] = useState<number>(5);
 
     const handleClick = () => {
         if (document && clickedIndex < 21) {
@@ -177,10 +178,26 @@ function ScreenTwo({ onPageChange }: { onPageChange: (data: number) => void }) {
         }
     }
 
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCountDown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
     return (
         <div className="min-h-screen items-center justify-center w-full relative">
             <Balloon countBallons={21} onClickedBallon={() => handleClick()} />
             <div className='flex flex-col w-full justify-center items-center min-h-screen'>
+                <span className={`mb-8 text-4xl font-semibold ${countDown === 0 ? '' : 'border-2 p-2 rounded-4xl'}`}>{countDown === 0 ? '' : countDown}</span>
                 <span className='mb-8 text-xl font-semibold'>pukul balon nya biar nambah skor</span>
                 <span>skor tertinggi : 20</span>
                 <span className='mt-8'>skor araa</span>
@@ -205,61 +222,132 @@ function ScreenTwo({ onPageChange }: { onPageChange: (data: number) => void }) {
 }
 
 function ScreenThree({ onPageChange }: { onPageChange: (data: number) => void }) {
+    const [dragCount, setDragCount] = useState(0);
+    const [showMsg, setShowMsg] = useState(false);
+
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
-    // Efek rotasi 3D dari gerakan drag
     const rotateX = useTransform(y, [-100, 100], [15, -15]);
     const rotateY = useTransform(x, [-100, 100], [-15, 15]);
 
+    useEffect(() => {
+        if (dragCount === 50) {
+            onPageChange(3);
+        }
+        if (dragCount > 30) {
+            setShowMsg(true);
+        }
+    }, [dragCount])
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-pink-100 overflow-hidden">
+        <div className="flex flex-col items-center justify-center min-h-screen w-full bg-pink-100 overflow-hidden">
             <motion.div
-                drag
-                style={{
-                    x,
-                    y,
-                    rotateX,
-                    rotateY,
-                    perspective: 1000,
-                }}
-                dragElastic={0.2}
-                dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                className="cursor-grab text-center p-4"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1, duration: 0.5 }}
             >
-                <h1 className="text-3xl md:text-5xl font-bold text-pink-800">
-                    kalau ulang tahun, pasti ada kueh apa?
-                </h1>
+                <BirthdayBunting />
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1, duration: 0.5 }}
-                    className="mt-4 text-2xl md:text-4xl text-pink-600"
+                    onDragStart={() => setDragCount(dragCount + 1)}
+                    drag
+                    style={{
+                        x,
+                        y,
+                        rotateX,
+                        rotateY,
+                        perspective: 1000,
+                    }}
+                    dragElastic={0.2}
+                    dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
+                    className="cursor-grab text-center p-4"
                 >
-                    <Canvas camera={{ position: [0, 0, 30], fov: 40 }}>
-                        <ambientLight intensity={0.7} />
-                        <directionalLight position={[10, 10, 5]} intensity={1} />
-                        <Suspense fallback={null}>
-                            <Center>
-                                <Text3D
-                                    font="/fonts/helvetiker_regular.typeface.json"
-                                    size={3}
-                                    height={1}
-                                    curveSegments={12}
-                                    bevelEnabled
-                                    bevelThickness={0.1}
-                                    bevelSize={0.05}
-                                    bevelOffset={0}
-                                    bevelSegments={5}
-                                >
-                                    Kue Ulang Tahun
-                                    <meshStandardMaterial color="#ff6699" />
-                                </Text3D>
-                            </Center>
-                        </Suspense>
-                        <OrbitControls enablePan={false} />
-                    </Canvas>
+                    <h1 className="text-3xl md:text-5xl font-bold text-pink-800">
+                        ohh iya,
+                    </h1>
+                    <h1 className="text-3xl md:text-5xl font-bold text-pink-800">
+                        kalau ulang tahun pasti ada kue apa?
+                    </h1>
+                    <motion.h2
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 4, duration: 0.5 }}
+                        className="mt-4 text-2xl md:text-4xl text-pink-600"
+                    >
+                        yap, kue ulang tahun 🎂
+                    </motion.h2>
+                    <motion.h2
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 4, duration: 0.5 }}
+                        className="text-sm mt-20 text-pink-600"
+                    >
+                        <div>
+                            <BirthdayTrumpet dragCount={dragCount} />
+                            tarik-tarik terompetnya,<br />buat liat kue ulang tahun araaaaaa
+                        </div>
+                    </motion.h2>
+
+                    {showMsg && (
+                        <motion.h2
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 1, duration: 0.5 }}
+                            className="text-sm mt-20 text-pink-600"
+                        >
+                            <div>
+                                bentar lagi kue ulang tahunnya muncul, <br />
+                                terus tarikkk
+                            </div>
+                        </motion.h2>
+                    )}
                 </motion.div>
+                {/* <Canvas camera={{ position: [0, 0, 80], fov: 40 }}>
+                    <ambientLight intensity={0.7} />
+                    <directionalLight position={[10, 10, 5]} intensity={1} />
+                    <Suspense fallback={null}>
+                        <Center>
+                            <Text3D
+                                font="/fonts/helvetiker_regular.typeface.json"
+                                size={3}
+                                height={1}
+                                curveSegments={12}
+                                bevelEnabled
+                                bevelThickness={0.1}
+                                bevelSize={0.05}
+                                bevelOffset={0}
+                                bevelSegments={5}
+                            >
+                                kalau ulang tahun, pasti ada kueh apa?
+                                <meshStandardMaterial color="#ff6699" />
+                            </Text3D>
+                        </Center>
+                    </Suspense>
+                    <OrbitControls enablePan={false} />
+                </Canvas>
+                <Canvas camera={{ position: [0, 0, 30], fov: 40 }}>
+                    <ambientLight intensity={0.7} />
+                    <directionalLight position={[10, 10, 5]} intensity={1} />
+                    <Suspense fallback={null}>
+                        <Center>
+                            <Text3D
+                                font="/fonts/helvetiker_regular.typeface.json"
+                                size={3}
+                                height={1}
+                                curveSegments={12}
+                                bevelEnabled
+                                bevelThickness={0.1}
+                                bevelSize={0.05}
+                                bevelOffset={0}
+                                bevelSegments={5}
+                            >
+                                Kue Ulang Tahun
+                                <meshStandardMaterial color="#ff6699" />
+                            </Text3D>
+                        </Center>
+                    </Suspense>
+                    <OrbitControls enablePan={false} />
+                </Canvas> */}
             </motion.div>
         </div>
     );
@@ -267,15 +355,27 @@ function ScreenThree({ onPageChange }: { onPageChange: (data: number) => void })
 
 function BirthdayCakeSVG({ onPageChange }: { onPageChange: (data: number) => void }) {
     const texts = [
-        "tiup lilinnya yaa raa",
+        "ini dia kue dan lilinnya raa",
         "ehh iya belum nyala lilinnya",
-        "ayoo tiupp lilinnya, keburu mati apinya...",
-        "selamat ulang tahun! Araaaaaaaaaa",
-        "semoga harimu menyenangkan",
+        "selamat ulang tahun!\nAraaaaaaaaaa",
+        "waktu yang udah kelewat kemarin,",
+        "bakal terus keganti sama waktu yang baru",
+        "lakuin semua yang araa mau",
+        "araa bikin happy",
+        "araa bikin bahagia",
+        "araa bikin semangat",
+        "fokus sama apa yang araa mau",
+        "gausah mikirin umur, karena cuma angka",
         "wish you all the best",
+        "ayoo tiupp lilinnya, keburu mati apinya...",
+        "yeayyyyyyyy, sekali lagi mau ucapin",
+        "Selamat Ulang Tahun Araaaaaaa",
+        " - Pengagum Rahasia (kang ahmad rivaiy) ☺️"
     ];
     const [index, setIndex] = useState(0);
     const [lilinOn, setLilinOn] = useState(false);
+    const [showConvetti, setShowConvetti] = useState(false);
+    const [showGift, setShowGift] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -292,11 +392,32 @@ function BirthdayCakeSVG({ onPageChange }: { onPageChange: (data: number) => voi
             if (candleFlame) {
                 candleFlame.style.display = 'block';
             }
-        }, 10000);
-    }, [])
+        }, 9000);
+
+        setTimeout(() => {
+            setShowConvetti(true);
+        }, 9000);
+
+        setTimeout(() => {
+            setLilinOn(false);
+        }, (texts.length - 3) * 5000);
+    }, []);
+
 
     return (
         <div className="min-h-screen items-center justify-center w-full relative">
+            {
+                showConvetti && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 1, duration: 0.5 }}
+                        className="text-sm text-pink-600"
+                    >
+                        <FullscreenConfetti />
+                    </motion.div>
+                )
+            }
             <div className='w-full flex justify-center items-center min-h-screen'>
                 <svg width="200" height="250" viewBox="0 0 200 250">
                     {/* Piring */}
@@ -350,11 +471,20 @@ function BirthdayCakeSVG({ onPageChange }: { onPageChange: (data: number) => voi
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.8 }}
-                        className='text-black text-sm'
+                        className='text-black text-[21px] text-center'
                     >
                         {texts[index]}
                     </motion.span>
                 </AnimatePresence>
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: texts.length * 5, duration: 0.5 }}
+                    className="text-sm cursor-pointer"
+                    onClick={() => onPageChange(4)}
+                >
+                    <GiftBox />
+                </motion.div>
             </div>
         </div>
     );
@@ -371,34 +501,16 @@ function BirthdayPage({ onPageChange }: { onPageChange: (data: number) => void }
     const [showMessage, setShowMessage] = useState(false);
 
     return (
-        <div className="min-h-screen bg-pink-100 flex flex-col items-center justify-center p-4 text-center">
+        <div className="min-h-screen w-full bg-[#A3D8FF] flex flex-col items-center justify-center p-4 text-center">
             <Head>
-                <title>Happy Birthday, Sayang! ❤️</title>
+                <title>Happy Birthday, Cantikk! ❤️</title>
             </Head>
-
-            <h1 className="text-4xl font-bold text-pink-300 mb-6">Happy Birthday, Awraaaa! 🎉</h1>
 
             <img
                 src="/kalian-berdua.jpg"
                 alt="Kalian berdua"
-                className="w-64 h-64 rounded-full object-cover border-4 border-pink-400"
+                className="w-64 h-64 rounded-xl object-cover border-4 border-[#4793AF]"
             />
-
-            <button
-                onClick={() => onPageChange(2)}
-                className="mt-8 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition"
-            >
-                {showMessage ? "Sembunyikan Pesan" : "Klik untuk Pesan Spesial!"}
-            </button>
-
-            {showMessage && (
-                <div className="mt-6 p-4 max-w-md bg-white rounded-lg shadow-lg">
-                    <p className="text-gray-800">
-                        Sayang, selamat ulang tahun ya! Aku bersyukur banget bisa merayakan hari spesial ini bersamamu.
-                        Semoga tahun ini penuh kebahagiaan dan kesuksesan untuk kamu. Aku sayang kamu! ❤️
-                    </p>
-                </div>
-            )}
         </div>
     );
 }
