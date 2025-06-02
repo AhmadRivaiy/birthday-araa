@@ -32,11 +32,13 @@ const blades = generateBladeGroup(10);
 export default function PageMain() {
     const [signatureData, setSignatureData] = useState<string | null>(null);
     const [pageID, setPageID] = useState<number | null>(0);
+    const audioRef = useRef<HTMLAudioElement>(null);
 
     const handlePageChange = (newPageID: number, sign: string | null) => {
         setPageID(newPageID);
 
         if (sign) {
+            audioRef.current?.play();
             setSignatureData(sign);
         }
     };
@@ -45,8 +47,22 @@ export default function PageMain() {
         setPageID(0);
     }, []);
 
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (audio) {
+            audio.volume = 0.4;
+            const playAudio = () => {
+                audio.play().catch((e) => console.log('Autoplay blocked:', e));
+                window.removeEventListener('click', playAudio);
+            };
+
+            window.addEventListener('click', playAudio);
+        }
+    }, []);
+
     return (
         <div className="w-full">
+            <audio ref={audioRef} src="/birthday-fun.mp3" loop preload="auto" />
             {
                 signatureData && (
                     <motion.div
